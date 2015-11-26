@@ -1,18 +1,21 @@
-function [grid, orig] = CreateGridFromPairs (gps_list, accuracy)
+function [grid, orig] = CreateGridFromPairs (gps_list, accuracy, thickness)
 
-% Get the list up to accurate point
-gps_list = floor(gps_list/accuracy);
+if ~exist('thickness','var')
+    thickness = 3;
+end
 
-% Start from (0,0)
-orig = min(gps_list)-1;
-gps_list = bsxfun(@minus,gps_list,orig);
+[gps_list,orig] = PointsFloor(gps_list,accuracy);
 
 % Calc thin grid
 grid00 = accumarray(gps_list,1);
 
 % Make the grid thicker
-grid = zeros(size(grid00)+1);
-grid(1:end-1,1:end-1) = grid00;
-grid(2:end,1:end-1) = grid00;
-grid(1:end-1,2:end) = grid00;
-grid(2:end,2:end) = grid00;
+grid = zeros(size(grid00)+thickness-1);
+orig = orig - floor(thickness/2);
+orig = double(orig)*accuracy;
+
+for i = 1:thickness
+    for j = 1:thickness
+        grid(i:end-thickness+i,j:end-thickness+j) = grid00;
+    end
+end
