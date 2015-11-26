@@ -14,8 +14,8 @@ frame_struct = [];
 
 for i = 1:size(interesting_points,1)
     st.p = interesting_points(i,:);
-    d = interesting_direction(i);
-    idx = find(orig_points(1:end-1,1) == st.p(:,1) & orig_points(1:end-1,2)== st.p(:,2) & direction == d);
+    st.d = interesting_direction(i);
+    idx = find(orig_points(1:end-1,1) == st.p(:,1) & orig_points(1:end-1,2)== st.p(:,2) & direction == st.d);
     st.file = fileidx(idx);
     st.frame = fileframe(idx);
     

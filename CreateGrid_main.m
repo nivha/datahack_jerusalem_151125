@@ -46,18 +46,19 @@ end
 frame_struct = FindFrames (gps_list, fileindex, [lat,lon], high_direction, ACCURACY);
 
 % Save the frame list
-fid = fopen('frame_list.csv','w');
-fwrite(fid,sprintf('type,lat,lon,data\n'));
+fid = fopen('frame_db.csv','w');
+fwrite(fid,sprintf('lat,lon,direction,filename,gps_frame_pos\n'));
 
 for st = frame_struct'
     p = (st.p+orig)*ACCURACY;
-    fwrite(fid,sprintf('file,%g,%g,',p(:,1),p(:,2)));
-    for idx = st.file'
-        fwrite(fid,sprintf('%s,',files(idx).name));
+    d = st.d;
+    if d > 4
+        d = d+1;
     end
-    fwrite(fid,sprintf('\nfile,%g,%g,',p(:,1),p(:,2)));
-    fwrite(fid,sprintf('%g,',st.frame));
-    fwrite(fid,sprintf('\n'));
+    
+    for i = 1:numel(st.file)
+        fwrite(fid,sprintf('%g,%g,%d,%s,%d\n',p(:,1),p(:,2),d,files(st.file(i)).name,st.frame(i)));
+    end
 end
 
 fclose(fid);
