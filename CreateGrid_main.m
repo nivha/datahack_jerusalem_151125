@@ -47,7 +47,7 @@ frame_struct = FindFrames (gps_list, fileindex, [lat,lon], high_direction, ACCUR
 
 % Save the frame list
 fid = fopen('frame_db.csv','w');
-fwrite(fid,sprintf('lat,lon,direction,filename,gps_frame_pos\n'));
+fwrite(fid,sprintf('lat,lon,direction,filename,filename_idx,gps_frame_pos\n'));
 
 for st = frame_struct'
     p = (st.p+orig)*ACCURACY;
@@ -57,8 +57,12 @@ for st = frame_struct'
     end
     
     for i = 1:numel(st.file)
-        fwrite(fid,sprintf('%g,%g,%d,%s,%d\n',p(:,1),p(:,2),d,files(st.file(i)).name,st.frame(i)));
+        fwrite(fid,sprintf('%g,%g,%d,%s,%d\n',p(:,1),p(:,2),d,files(st.file(i)).name,st.file(i),st.frame(i)));
     end
 end
 
 fclose(fid);
+
+
+[table,title] = GetFeatures_time(frame_struct,BASE_DIR,files,ACCURACY,orig);
+csvwrite('features_table_time.csv',table);
