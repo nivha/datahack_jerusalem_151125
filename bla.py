@@ -1,6 +1,8 @@
+import os
 import scipy.io as spio
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 
 BASE_DIR = "D:\Users\Mojo\workspace\datahack_jerusalem_112015\mobileye\mobileye_data"
 
@@ -78,19 +80,67 @@ class GPSGrid():
 
 
 def add_mat2grid(mat_path):
-
     # Flatten data
     raw_data = spio.loadmat(p, struct_as_record=False, squeeze_me=True)
     data = flat_data(raw_data)
     add_gps2_to_data(raw_data, data)
-
     # add to grid
 
 
+def get_mats_for_lat_lon(p_lat, p_lon):
+    for fname in os.listdir(BASE_DIR):
+        p = os.path.join(BASE_DIR, fname)
+        # print p
+
+        raw_data = spio.loadmat(p, struct_as_record=False, squeeze_me=True)
+        data = flat_data(raw_data)
+        add_gps2_to_data(raw_data, data)
+
+        for i in xrange(len(data['gps_lat'])):
+            lat = data['gps_lat'][i]
+            lon = data['gps_lon'][i]
+            # print lat, lon
+            if abs(lat-p_lat)<1e-3 and abs(lon-p_lon)<1e-3:
+                # print i, data['frameIdx'][i], p
+                print fname
+                break
 
 if __name__=="__main__":
 
-    pixel_size = 5
-    grid = GPSGrid(pixel_size=pixel_size)
 
+    p_lat = 31.5242
+    p_lon = 35.3918
+    get_mats_for_lat_lon(p_lat, p_lon)
 
+    l = ['JET_58-425-73_N_CL_MX_3.9_26591_3.mat',
+         'JET_83-108-70_D_CL_MX_3.9_23199_5.mat',
+         'JET_83-108-70_D_CL_MX_3.9_23455_7.mat',
+         'JET_83-108-70_D_CL_MX_3.9_23504_1.mat',
+         'JET_83-108-70_D_CL_MX_3.9_23564_0.mat',
+         'JET_83-108-70_D_CL_MX_3.9_23702_7.mat',
+         'JET_83-108-70_D_CL_MX_3.9_23712_0.mat',
+         'JET_83-108-70_D_OC_MX_3.9_23453_1.mat',
+         'JET_83-108-70_D_OC_MX_3.9_26334_0.mat',
+         'JET_83-108-70_D_OC_MX_3.9_26334_1.mat',
+         ]
+
+    dd = []
+    for fname in l:
+        p = os.path.join(BASE_DIR, fname)
+        # print p
+
+        raw_data = spio.loadmat(p, struct_as_record=False, squeeze_me=True)
+        data = flat_data(raw_data)
+        add_gps2_to_data(raw_data, data)
+
+        for i in xrange(len(data['gps_lat'])):
+            lat = data['gps_lat'][i]
+            lon = data['gps_lon'][i]
+            # print lat, lon
+            if abs(lat-p_lat)<1e-3 and abs(lon-p_lon)<1e-3:
+                row = pd.Series({key: data[key][i] for key in data.keys() if not key.startswith('signs')})
+                # print i, data['frameIdx'][i], p
+                dd.append(row)
+
+    z = pd.DataFrame(dd)
+    z.columns = [key for key in data.keys() if not key.startswith('signs')]
